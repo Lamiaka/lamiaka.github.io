@@ -183,3 +183,6 @@ h2.small { font-size: 1.35rem; margin-bottom: .7em; }
 .cta-band .actions.tight { margin: 0; }
 .btn.ghost-light { background: transparent; color: #fff; border-color: rgba(255,255,255,.6); }
 .btn.ghost-light:hover { color: #fff; border-color: #fff; }
+.prose figure { margin: 2em 0; }
+.prose figure img { display: block; margin: 0 auto; }
+.prose figcaption { margin-top: 10px; font-size: .9rem; color: var(--muted); text-align: center; }
