@@ -186,3 +186,18 @@ h2.small { font-size: 1.35rem; margin-bottom: .7em; }
 .prose figure { margin: 2em 0; }
 .prose figure img { display: block; margin: 0 auto; }
 .prose figcaption { margin-top: 10px; font-size: .9rem; color: var(--muted); text-align: center; }
+
+.muted-lead { color: var(--muted); }
+.pubs { padding-left: 1.3em; margin: 24px 0; }
+.pubs li { margin-bottom: 18px; padding-left: 4px; }
+.pubs li::marker { color: var(--label); font-family: var(--mono); font-size: .85rem; }
+.pubs a { font-weight: 600; text-decoration: none; color: var(--ink); }
+.pubs a:hover { color: var(--label); }
+.pubs .authors, .pubs .venue { display: block; font-size: .92rem; color: var(--muted); }
+.pubs .authors strong { color: var(--ink); font-weight: 600; }
+.thesis { font-size: .95rem; color: var(--muted); }
+.projects { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+.projects li { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.projects a { font-weight: 600; text-decoration: none; color: var(--ink); display: block; }
+.projects a:hover { color: var(--label); }
+.projects span { color: var(--muted); font-size: .95rem; }
