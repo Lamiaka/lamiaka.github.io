@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Building a Conversational Shopping Assistant Taught Me About Shipping LLMs | Lamia Kasmi</title>
+<meta name="description" content="The failures behind a production LLM search assistant, and the engineering habits they forced: evaluation gates, versioning and joined-up observability.">
+<link rel="canonical" href="https://lamiakasmi.com/writing/building-a-conversational-shopping-assistant/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="What Building a Conversational Shopping Assistant Taught Me About Shipping LLMs | Lamia Kasmi">
+<meta property="og:description" content="The failures behind a production LLM search assistant, and the engineering habits they forced: evaluation gates, versioning and joined-up observability.">
+<meta property="og:url" content="https://lamiakasmi.com/writing/building-a-conversational-shopping-assistant/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Lamia Kasmi","jobTitle":"Senior Data Scientist and AI Consultant","url":"https://lamiakasmi.com","address":{"@type":"PostalAddress","addressLocality":"Zürich","addressCountry":"CH"},"alumniOf":[{"@type":"CollegeOrUniversity","name":"ETH Zürich"},{"@type":"CollegeOrUniversity","name":"EPFL"}],"knowsAbout":["Experimentation","Incrementality measurement","Marketing attribution","Search and retrieval","LLM evaluation","Machine learning","Laser physics"],"knowsLanguage":["en","fr","de"],"worksFor":{"@type":"Organization","name":"Kasmi Data & AI","url":"https://lamiakasmi.com"}}
+</script>
+
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/">Lamia Kasmi</a>
+    <nav aria-label="Main">
+      <a href="/consulting/">Consulting</a>
+      <a href="/about/">About</a>
+      <a href="/writing/">Writing</a>
+      <a class="nav-cta" href="/contact/">Contact</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap narrow page"><article><p class="eyebrow"><a href="/writing/">Writing</a> · <time datetime="2026-07-01">1 July 2026</time></p><h1>What Building a Conversational Shopping Assistant Taught Me About Shipping LLMs</h1><div class="prose"><p>Building a demo that answers "find me a waterproof running jacket under $100" is a weekend project. Building one that answers it correctly for thousands of users, every time, on top of a live commerce platform is a different job entirely. Over several months I built a conversational search assistant for a shopping use case — the kind of system where the LLM extracts a shopper's intent from a conversation, turns it into structured parameters, and hands those to a search API, an architecture teams like <a href="https://adevinta.com/techblog/transforming-e-commerce-with-a-conversational-search-assistant-powered-by-large-language-models/">Adevinta have written about publicly</a>. Most of what I learned came from the ways it broke, not the ways it worked.</p>
+<p>Here are the failures, and what I took from them.</p>
+<h2>The failures</h2>
+<p><strong>A schema rename silently degraded every answer.</strong> An upstream team renamed a product attribute from <code>price_usd</code> to <code>unit_price</code>. Nothing crashed. The assistant simply stopped filtering on price, so "under $100" started returning $400 jackets. No error, no alert — just quietly worse answers that we only caught because a teammate noticed during manual testing.</p>
+<p><strong>Every prompt change moved the output — sometimes in ways I didn't expect.</strong> I built the system prompt lean and added instructions incrementally, measuring the effect of each addition on answer quality rather than writing one big prompt up front. That discipline paid off in a case I didn't see coming: adding explicit instructions about how to handle links made the output <em>structure</em> less consistent — the model stopped reliably using the same response shape — but overall answer <em>quality</em> went up, because the model started anchoring on actual link sources instead of improvising. A change I might have reverted on a quick glance was actually a net win. I only knew that because I was measuring.</p>
+<p><strong>Engineers and scientists were optimizing different things.</strong> I was tuning retrieval relevance offline; the platform engineers were measuring p95 latency and cache hit rates. Both of us shipped "improvements" that made the other's metric worse, because we never agreed on a shared definition of a good response.</p>
+<p><strong>We couldn't reconstruct what happened.</strong> When a bad answer got reported, we often couldn't tell which prompt version, which model, and which retrieved context produced it. Debugging became archaeology.</p>
+<h2>What I took from it</h2>
+<p><strong>Prompt engineering is systems engineering, not copywriting.</strong> The response the user sees is a function of the prompt <em>and</em> everything feeding it: upstream API contracts, the retrieved context, and even field and schema names that leak into the model's reasoning. Because the model interprets instructions probabilistically, small wording changes can cause disproportionate shifts in behavior — <a href="https://deepchecks.com/llm-production-challenges-prompt-update-incidents/">Deepchecks found that prompt updates drive most production incidents</a>, and there's even <a href="https://arxiv.org/pdf/2601.22025">research showing "better" prompts can quietly hurt performance</a>. My takeaway wasn't "don't touch the prompt." It was the opposite: build it lean, add one thing at a time, and measure. The link-instruction change traded structural consistency for a real gain in grounding — a tradeoff I'd have missed without incremental evaluation. Also, when "under $100" quietly stopped working, the root cause wasn't the prompt at all; it was a field name three services upstream. The whole pipeline — schema, context, instructions — is one coupled surface.</p>
+<p><strong>Cross-functional alignment is not a nice-to-have.</strong> The single highest-leverage thing I did was get engineers and scientists agreeing on the same success definition before touching code. Once "a good response" meant <em>both</em> relevant <em>and</em> under a latency budget <em>and</em> renderable by the frontend, we stopped shipping regressions into each other's work. Alignment upfront was cheaper than the rework it prevented.</p>
+<p><strong>Observability has to match the host system's standards.</strong> The assistant was built on top of an existing commerce platform with its own tracing and tracking conventions. Standard uptime monitoring answers "is it working?"; <a href="https://www.vellum.ai/blog/a-guide-to-llm-observability">LLM observability answers "why did this specific conversation succeed or fail?"</a> — which means every inference should carry its prompt version, input context, model parameters, and parsed output. But logging that in my own ad-hoc format meant its traces didn't join up with the platform's. The fix was to emit logs in the platform's existing tracking standard — same trace IDs, same event schema — so one request could be followed from user query through retrieval, model call, and rendered card. Observability that doesn't align with the system you're building on top of isn't observability; it's a second, disconnected story.</p>
+<p><strong>Tests have to gate deployment.</strong> I added an evaluation suite that had to pass before anything shipped: a set of representative queries ("waterproof jacket under $100", "gift for a 6-year-old who likes dinosaurs", ambiguous ones like "something warm") checked for retrieval relevance, valid output structure, and adherence to constraints like price and category. This is also what made the incremental prompt work safe — I could add an instruction, watch the eval scores, and keep or drop it based on evidence instead of vibes.</p>
+<p><strong>Version everything — prompts and models.</strong> Every response records the exact prompt version and model version that produced it. When quality shifts, I can diff what changed and roll back a specific prompt without redeploying the world. Treating prompts as versioned artifacts, the same way we treat model checkpoints and code, turned "why did it get worse?" from a multi-day investigation into a lookup.</p>
+<h2>The through-line</h2>
+<p>The pattern across all of these is the same: a conversational assistant isn't a model, it's a system, and it lives inside a larger system it doesn't control. The model is often the most reliable part. The failures came from the seams — the contract with an upstream API, the definition of "good" shared across teams, the logging boundary with the host platform, the gap between a change that reads well and one that measures well.</p>
+<p>Getting an LLM to say something impressive is easy. Getting a system to say the right thing reliably, and being able to prove it did, is the actual work — and it's mostly engineering discipline, not prompt cleverness.</p></div></article><aside class="post-cta"><p>Working on something like this? <a href="/contact/">Get in touch.</a></p></aside></main>
+<footer class="site-footer">
+  <div class="wrap bar">
+    <span>© 2026 Kasmi Data &amp; AI · Lamia Kasmi · Zürich, Switzerland</span>
+    <span><a href="/impressum/">Impressum</a></span>
+  </div>
+</footer>
+</body>
+</html>
