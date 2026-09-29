@@ -252,9 +252,10 @@ details.more .pubs { margin-top: 0; }
 #roles .facts, #roles > .wrap > p, #results .stats + p { max-width: 880px; }
 @media (min-width: 900px) {
   #results .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .projects.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .projects.cards li.featured { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 28px; align-items: center; }
-  .projects.cards li.featured .thumb-link { grid-row: 1 / span 3; }
+  .projects.cards { grid-template-columns: 1fr; }
+  .projects.cards li.featured { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); column-gap: 32px; align-content: center; }
+  .projects.cards li.featured > * { grid-column: 2; }
+  .projects.cards li.featured > .thumb-link { grid-column: 1; grid-row: 1 / span 6; align-self: center; }
   .projects.cards li.featured .thumb { margin-bottom: 0; }
   #exploring .topics { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
 }
