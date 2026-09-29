@@ -253,6 +253,16 @@ details.more .pubs { margin-top: 0; }
 @media (min-width: 900px) {
   #results .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .projects.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .projects.cards li.featured { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 28px; align-items: center; }
+  .projects.cards li.featured .thumb-link { grid-row: 1 / span 3; }
+  .projects.cards li.featured .thumb { margin-bottom: 0; }
   #exploring .topics { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
 }
 .projects.cards .thumb { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 14px; }
+.projects.cards .thumb-link { margin-bottom: 0; }
+.projects.cards .thumb-link .thumb { transition: border-color .15s, opacity .15s; }
+.projects.cards .thumb-link:hover .thumb { border-color: var(--mark); opacity: .92; }
+.projects .card-links { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; font-size: .9rem; }
+.projects .card-links a { display: inline; font-weight: 600; color: var(--accent); margin: 0; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mark); }
+.projects .card-links a:hover { color: var(--label); }
+.hero .role { font-family: var(--serif); font-size: clamp(1.2rem, 2.4vw, 1.5rem); color: var(--ink); margin: -.2em 0 .9em; }
