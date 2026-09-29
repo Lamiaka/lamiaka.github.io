@@ -240,7 +240,7 @@ h2.small { font-size: 1.35rem; margin-bottom: .7em; }
 .subnav a:hover { color: var(--ink); border-color: var(--mark); }
 section[id] { scroll-margin-top: 110px; }
 .split { display: grid; gap: 40px; }
-@media (min-width: 900px) { .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 64px; align-items: start; } .split .timeline { margin-top: 0; } }
+@media (min-width: 900px) { .split { grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr); gap: 64px; align-items: start; } .split .timeline { margin-top: 0; } }
 .projects.cards { border-top: 0; display: grid; gap: 16px; grid-template-columns: 1fr; margin-top: 20px; }
 .projects.cards li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; }
 .projects.cards a { margin-bottom: 6px; }
