@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Consulting | Lamia Kasmi</title>
+<title>Data and AI consulting in Zürich | Kasmi Data &amp; AI</title>
 <meta name="description" content="Fixed-scope data science and AI consulting from Zürich: measurement and experimentation, search and LLM systems, and ML for science and industry.">
 <link rel="canonical" href="https://lamiakasmi.com/consulting/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Consulting | Lamia Kasmi">
+<meta property="og:title" content="Data and AI consulting in Zürich | Kasmi Data &amp; AI">
 <meta property="og:description" content="Fixed-scope data science and AI consulting from Zürich: measurement and experimentation, search and LLM systems, and ML for science and industry.">
 <meta property="og:url" content="https://lamiakasmi.com/consulting/">
 <meta name="twitter:card" content="summary">
@@ -99,6 +99,7 @@
   <div class="wrap">
     <p class="eyebrow">How engagements work</p>
     <h2>Small, fixed scope first. Then build.</h2>
+    <p class="muted-lead">Every engagement starts with a free 30-minute call to check whether I am the right person for your problem.</p>
     <ol class="steps">
       <li><h3>Diagnostic</h3><p>Two weeks, fixed fee. I look at your data, your setup and the decision you need to make, and hand back written findings with a prioritised plan.</p></li>
       <li><h3>Build</h3><p>Six to eight weeks on one outcome: a measurement programme running, an evaluation harness in production, a model your team owns.</p></li>
@@ -127,31 +128,51 @@
     <div class="grid two">
       <article class="work">
         <p class="tag">eBay · Growth marketing</p>
-        <h3>Incrementality and experimentation at marketplace scale</h3>
-        <p>Five years in eBay's global growth marketing organisation, first in analytics, then in data science: A/B testing, channel attribution and incrementality measurement for paid search and coupons. The question behind all of it was which spend actually caused the sale.</p>
+        <h3>Which marketing spend actually brings new buyers</h3>
+        <p>Designed and analysed A/B tests and incrementality studies for paid search and coupon campaigns in the US, UK and Germany, separating the buyers each campaign really brought in from those who would have come anyway.</p>
       </article>
       <article class="work">
         <p class="tag">eBay · Retention</p>
-        <h3>Churn prediction for 130 million users a day</h3>
-        <p>A LightGBM churn model (F1 0.90), exported to ONNX and run as a daily batch over the full user base, alongside a customer segmentation that labels the same users every day for targeting.</p>
+        <h3>Knowing which customers are about to leave</h3>
+        <p>A churn model scoring every one of eBay's 130 million customers each day, accurate enough (F1 0.90) for retention teams to target their emails at the people most likely to leave. Owned from the first question to handover.</p>
       </article>
       <article class="work">
-        <p class="tag">eBay · LLM systems</p>
-        <h3>A conversational shopping assistant that survives production</h3>
-        <p>LLM intent extraction feeding structured product search, with an evaluation suite that gates every release, versioned prompts and models, and traces joined to the platform's own tracking.</p>
+        <p class="tag">eBay · AI assistant</p>
+        <h3>An AI shopping assistant customers can rely on</h3>
+        <p>Evaluation cycles that raised the assistant's answerability to 89% and its resolution rate to 92%, a safety gate that stops 98% of unsafe requests, and personalised prompts with 8× the click-through of generic ones.</p>
         <p><a class="more" href="/writing/building-a-conversational-shopping-assistant/">What it taught me →</a></p>
       </article>
       <article class="work">
         <p class="tag">eBay · Personalisation</p>
-        <h3>Graph-based user embeddings</h3>
-        <p>An autoencoder over a co-purchase graph combined with a Siamese network trained on triplet loss, run deliberately as a feasibility study to decide whether graph signals were worth productionising.</p>
+        <h3>Homepage recommendations that earn more clicks</h3>
+        <p>Rebuilt the Recently Viewed Items module on eBay's homepage to hide items already bought and near-duplicates, lifting click-through from 5% to 6% among the most active customers.</p>
+      </article>
+      <article class="work">
+        <p class="tag">eBay · Customer insight</p>
+        <h3>One shared picture of every customer</h3>
+        <p>A segmentation of the full customer base by expertise and engagement, updated daily. Marketing teams in four markets adopted it for targeting, and production recommendation systems use it as an input.</p>
       </article>
       <article class="work">
         <p class="tag">ETH Zürich · Research</p>
-        <h3>Timing electrons on the attosecond scale</h3>
-        <p>PhD measuring photoemission time delays of electrons on the attoline beamline, plus gas-phase work on the ultrafast relaxation of the ethylene cation. Co-author, <a href="https://doi.org/10.1021/acs.jpclett.6b00646">J. Phys. Chem. Lett. 7, 1901 (2016)</a>.</p>
+        <h3>Reliable signals from very noisy measurements</h3>
+        <p>PhD extracting attosecond timing signals from millions of noisy measurements, with the uncertainty of every result quantified. Published in <em>Science</em> and <em>Nature Physics</em>; the same discipline I bring to industrial and scientific data.</p>
       </article>
       
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="wrap narrow">
+    <p class="eyebrow">Questions</p>
+    <h2>Before we talk</h2>
+    <div class="faq">
+      <details><summary>Do you sign an NDA?</summary><p>Yes. I sign a standard NDA before looking at any data, and your data stays in your systems unless we agree otherwise.</p></details>
+      <details><summary>Do you work remotely or on site?</summary><p>Mostly remotely, with on-site sessions in the Zürich area when working side by side helps, for example to kick off a project or hand it over.</p></details>
+      <details><summary>What do you need from us?</summary><p>One person who owns the question, read access to the relevant data, and two short check-ins a week while the project runs.</p></details>
+      <details><summary>Which tools do you work with?</summary><p>Yours. I work in Python and SQL on the warehouse and cloud you already use, so everything keeps running after the engagement ends.</p></details>
+      <details><summary>What size of company do you work with?</summary><p>I work best with teams where data decisions carry real money but there is no large data science team yet, and with larger teams that need a senior specialist for one well-defined problem.</p></details>
+      <details><summary>What happens after the first call?</summary><p>If there is a fit, I send a one-page proposal for the diagnostic with scope, dates and a fixed fee. Nothing starts until you have agreed to it in writing.</p></details>
     </div>
   </div>
 </section>

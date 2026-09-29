@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linear Regression Isn&#x27;t Always a Straight Line | Lamia Kasmi</title>
+<meta name="description" content="Why adding x² keeps a model linear, and how the same idea connects feature engineering, kernels and neural networks.">
+<link rel="canonical" href="https://lamiakasmi.com/writing/linear-in-parameters/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Linear Regression Isn&#x27;t Always a Straight Line | Lamia Kasmi">
+<meta property="og:description" content="Why adding x² keeps a model linear, and how the same idea connects feature engineering, kernels and neural networks.">
+<meta property="og:url" content="https://lamiakasmi.com/writing/linear-in-parameters/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Lamia Kasmi","jobTitle":"Senior Data Scientist and AI Consultant","url":"https://lamiakasmi.com","address":{"@type":"PostalAddress","addressLocality":"Zürich","addressCountry":"CH"},"alumniOf":[{"@type":"CollegeOrUniversity","name":"ETH Zürich"},{"@type":"CollegeOrUniversity","name":"EPFL"}],"knowsAbout":["Experimentation","Incrementality measurement","Marketing attribution","Search and retrieval","LLM evaluation","Machine learning","Laser physics"],"knowsLanguage":["en","fr","de"],"worksFor":{"@type":"Organization","name":"Kasmi Data & AI","url":"https://lamiakasmi.com"}}
+</script>
+
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/">Lamia Kasmi</a>
+    <nav aria-label="Main">
+      <a href="/about/">About</a>
+      <a href="/consulting/">Consulting</a>
+      <a href="/writing/">Writing</a>
+      <a class="nav-cta" href="/contact/">Contact</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap narrow page"><article><p class="eyebrow"><a href="/writing/">Writing</a> · <time datetime="2026-07-08">8 July 2026</time></p><h1>Linear Regression Isn&#x27;t Always a Straight Line</h1><div class="prose"><p>"Linear regression isn't always a straight line." If you've spent any time around data science content, you've seen this stated — it comes up in interviews, on forums, in countless posts. But it's almost always left as a fact to memorize: the posts tell you <em>that</em> it's true, rarely <em>why</em>. And without the why, the natural follow-up confusion survives intact: if you add x² as a feature, isn't that polynomial regression now — a different thing?</p>
+<p>It isn't. This post brings back the science behind the slogan — the math and the intuition that explain it. And the explanation is worth the detour, because it turns out to be a key to understanding machine learning methods far beyond regression: the same idea connects feature engineering, kernel methods, and neural networks.</p>
+<h2>Linear in what?</h2>
+<p>Take the model</p>
+<p>y = β₀ + β₁x + β₂x²</p>
+<p>The curve this traces through your data is a parabola — visibly not a straight line. But look at it from the model's point of view. Rename x² to z, treat it as just another input column, and you get</p>
+<p>y = β₀ + β₁x + β₂z</p>
+<p>which is a plain linear combination of coefficients. The loss surface is still quadratic in β. The normal equation still solves it. Every diagnostic, every piece of OLS machinery, applies unchanged. Nothing about the <em>fitting</em> changed — only the feature space did.</p>
+<p>You can see this in four lines: "polynomial regression" is <code>LinearRegression</code> fed an extra column.</p>
+<pre><code class="language-python">import numpy as np
+from sklearn.linear_model import LinearRegression
+
+rng = np.random.default_rng(0)
+x = rng.uniform(-3, 3, 200)
+y = 1 + 2*x - 0.5*x**2 + rng.normal(0, 0.3, 200)   # a parabola + noise
+
+X_poly = np.column_stack([x, x**2])                 # x² is just another column
+model = LinearRegression().fit(X_poly, y)
+print(model.intercept_, model.coef_)                # ≈ [1, 2, -0.5] — recovered by plain OLS
+</code></pre>
+<p>The estimator never knew a "polynomial" was involved. It saw two columns and did what it always does.</p>
+<figure><img alt="The same LinearRegression estimator fits a curve when given [x, x²] and a straight line when given [x] only" src="figures/parabola-fit.png" /></figure>
+<p>Both fits come from the <em>same</em> estimator with the same loss and the same solver. The only difference is the basis it was handed. The dashed line isn't a different, "more linear" model — it's the same model in a poorer feature space.</p>
+<p>"Linear" in linear regression means <strong>linear in the parameters</strong>, not linear in the inputs. Polynomial regression is the name of a technique, but mathematically it is linear regression wearing engineered features.</p>
+<p>The contrast makes it click. This is <em>not</em> linear regression:</p>
+<p>y = β₀ · e^(β₁x)</p>
+<p>Here β₁ lives inside the exponential. No renaming trick can pull it out into a linear combination, the loss is no longer quadratic in the parameters, and OLS no longer applies. That's what genuinely nonlinear regression looks like.</p>
+<p>A quick self-test — linear in the parameters or not?</p>
+<p>y = β₀ + β₁·log(x) — linear. log(x) is just a fixed transform; another column.
+y = β₀ + β₁²·x — not. The parameter enters squared.
+y = β₀ + β₁·x₁x₂ — linear. The interaction is computed from inputs before any parameter touches it.</p>
+<h2>Basis functions: the general principle</h2>
+<p>The renaming trick generalizes. Any model of the form</p>
+<p>y = β₀ + β₁·f₁(x) + β₂·f₂(x) + ... + βₖ·fₖ(x)</p>
+<p>is linear regression, for <em>any</em> functions f — squares, logs, sines, interactions, spline segments — with one condition: the f's must be <strong>fixed in advance</strong>, containing no parameters you need to estimate. These are called basis functions. You choose them, transform your data, and run OLS in the transformed space. The model is a straight "line" there, even if it looks wildly curved back in the original space.</p>
+<p>That single condition is the entire boundary between linear and nonlinear regression. Parameters outside the functions: linear. Parameters inside: not.</p>
+<h2>The linear algebra view: regression is projection</h2>
+<p>The phrase "basis functions" isn't a loose metaphor — it's literal linear algebra, and seeing it makes everything above geometric.</p>
+<p>Stack your n observations into a vector: y lives in ℝⁿ. Now evaluate each basis function on the data. Each one — the column of 1s, the column of x's, the column of x²'s — is also a vector in ℝⁿ. These are the columns of the design matrix X. Every prediction the model can possibly make is a linear combination of those columns:</p>
+<p>ŷ = β₀·<strong>1</strong> + β₁·<strong>x</strong> + β₂·<strong>x²</strong> = Xβ</p>
+<p>So the set of all reachable predictions, {Xβ : β ∈ ℝᵏ}, is the <strong>span</strong> of the columns — the column space of X, a flat k-dimensional subspace of ℝⁿ. <em>That</em> is what "linear in parameters" means geometrically: the model family forms a linear subspace. The basis functions are, in the strict sense, a basis for it. A model that's nonlinear in its parameters, like β₀·e^(β₁x), sweeps out a curved surface in ℝⁿ instead — no subspace, no basis, none of the machinery below.</p>
+<p>Fitting by least squares now has a one-word description: <strong>projection</strong>. The data vector y generally doesn't lie in the column space (real data has noise). OLS finds the point of the subspace closest to y in Euclidean distance — the orthogonal projection of y onto the column space. And orthogonality is where the normal equation comes from: the residual y − Xβ must be perpendicular to every column of X, which is exactly</p>
+<p>Xᵀ(y − Xβ) = 0  ⟹  β = (XᵀX)⁻¹Xᵀy</p>
+<p>The normal equation isn't an algebraic trick; it's the statement "the error is orthogonal to everything the model can express." The fitted values are ŷ = X(XᵀX)⁻¹Xᵀy = Hy, where the hat matrix H is a projection operator (apply it twice, nothing changes: H² = H).</p>
+<p>Every claim in that paragraph is checkable in a few lines of numpy:</p>
+<pre><code class="language-python">X = np.column_stack([np.ones_like(x), x, x**2])     # design matrix: three basis vectors in ℝⁿ
+
+beta = np.linalg.solve(X.T @ X, X.T @ y)            # normal equation
+residual = y - X @ beta
+
+print(X.T @ residual)          # ≈ [0, 0, 0] — residual ⊥ every column: orthogonality, verified
+
+H = X @ np.linalg.inv(X.T @ X) @ X.T                # hat matrix
+print(np.allclose(H @ H, H))   # True — projecting twice changes nothing: H² = H
+print(np.allclose(H @ y, X @ beta))  # True — ŷ really is &quot;project y onto the column space&quot;
+</code></pre>
+<p>This resolves the apparent paradox of the curvy parabola too. In the original x-space the fit looks bent; in ℝⁿ, where the fitting actually happens, it's a point in a perfectly flat 3-dimensional subspace. The curvature lives in how the basis vectors were built, not in the geometry of the fit.</p>
+<p>One more insight falls out for free: multicollinearity. If two columns are nearly parallel, the column space itself is barely affected — so the projection ŷ, the predictions, stay stable. But the <em>coordinates</em> of that projection in a nearly-degenerate basis are wildly ill-determined — so the coefficients blow up. Same subspace, bad coordinate system. That's the precise reason collinearity hurts interpretation but often barely hurts prediction.</p>
+<p>Watch it happen — duplicate a feature with a whisper of noise and refit on two bootstrap samples:</p>
+<pre><code class="language-python">x_dup = x + rng.normal(0, 1e-6, len(x))             # nearly parallel column
+X_col = np.column_stack([np.ones_like(x), x, x_dup])
+
+for seed in [1, 2]:
+    idx = np.random.default_rng(seed).integers(0, len(x), len(x))
+    b = np.linalg.lstsq(X_col[idx], y[idx], rcond=None)[0]
+    yhat = X_col @ b
+    print(f&quot;coefs: {b.round(1)}   first 3 preds: {yhat[:3].round(3)}&quot;)
+
+# coefs swing by thousands between resamples (only their SUM is pinned down);
+# the predictions barely move.
+</code></pre>
+<h2>Where the basis functions come from</h2>
+<p>Here's the thread most treatments never pull: a surprising amount of machine learning is an answer to the question <em>who supplies the basis functions?</em></p>
+<p>In classical linear modeling, you do. Feature engineering — polynomials, log transforms, interactions, splines — is the craft of hand-picking a basis in which the problem becomes linear. This is why linear models stay competitive in the hands of someone with domain knowledge: the intelligence lives in the features.</p>
+<p>Kernel methods make the basis implicit. A kernel SVM never computes the transformed features at all; the kernel trick evaluates inner products in a (sometimes infinite-dimensional) basis space directly. You pick a kernel family, and the basis comes with it, sight unseen.</p>
+<p>Neural networks learn the basis. A network's final layer is, quite literally, a linear model — its inputs are the last hidden layer's activations. Everything before that layer is a machine for <em>constructing</em> basis functions from data, tuned by gradient descent instead of chosen by hand. Representation learning is basis learning.</p>
+<p>Same skeleton each time — a linear map over some feature space — with escalating automation of the features themselves. Hand-crafted, implicit, learned.</p>
+<h2>Why it matters</h2>
+<p>This reframing earns its keep practically. It explains why feature engineering is so powerful with linear models (you're choosing the space where linearity holds). It explains what the kernel trick is actually a shortcut for. And it demystifies neural networks a little: the last layer is old, familiar territory — the novelty is upstream.</p>
+<p>So the next time "linear regression isn't always a straight line" comes up, you have more than the slogan — you have the why: <strong>linear regression is linear in the parameters, not the inputs. Geometrically it's a projection onto the subspace the basis functions span — which is exactly why transforming the inputs is so powerful.</strong></p></div></article><aside class="post-cta"><p>Working on something like this? <a href="/contact/">Get in touch.</a></p></aside></main>
+<footer class="site-footer">
+  <div class="wrap bar">
+    <span>© 2026 Kasmi Data &amp; AI · Lamia Kasmi · Zürich, Switzerland</span>
+    <span><a href="/impressum/">Impressum</a></span>
+  </div>
+</footer>
+</body>
+</html>
