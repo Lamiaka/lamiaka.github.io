@@ -266,5 +266,5 @@ details.more .pubs { margin-top: 0; }
 .projects .card-links a { display: inline; font-weight: 600; color: var(--accent); margin: 0; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mark); }
 .projects .card-links a:hover { color: var(--label); }
 .hero .role { font-family: var(--serif); font-size: clamp(1.2rem, 2.4vw, 1.5rem); color: var(--ink); margin: -.2em 0 .9em; }
-.projects .tags { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
-.projects .tags li { font-size: .78rem; padding: 3px 10px; border-radius: 999px; background: var(--bg-alt); border: 1px solid var(--line); color: var(--muted); }
+.projects.cards .tags { list-style: none; padding: 0; margin: 10px 0 0; border: 0; background: none; display: flex; flex-wrap: wrap; gap: 5px; }
+.projects.cards .tags li { display: inline-block; margin: 0; padding: 2px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-alt); color: var(--muted); font-size: .74rem; line-height: 1.5; box-shadow: none; }
